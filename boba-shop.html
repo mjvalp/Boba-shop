@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiny Boba Shop</title>
+<style>
+  :root {
+    --bg: #fff4ec;
+    --card: #ffffff;
+    --ink: #5a3e36;
+    --soft: #b08a7e;
+    --accent: #ff8fab;
+    --accent-dark: #e76f8f;
+    --chip: #fde2e4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    background-image: radial-gradient(#ffd6e0 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .shop {
+    width: 100%;
+    max-width: 860px;
+    background: var(--card);
+    border-radius: 28px;
+    box-shadow: 0 12px 0 #f3c9c0, 0 20px 40px rgba(90, 62, 54, 0.12);
+    padding: 28px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  h1 { margin: 0; font-size: 2rem; letter-spacing: 0.5px; }
+  .sub { margin: 4px 0 0; color: var(--soft); }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 680px) { .layout { grid-template-columns: 1fr; } }
+
+  .stage { text-align: center; }
+  .cup-wrap { display: inline-block; transform-origin: 50% 90%; }
+  .cup-wrap.shake { animation: shake 0.6s ease-in-out 2; }
+  .cup-wrap.bounce { animation: bounce 0.5s ease; }
+  @keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-12deg); }
+    40% { transform: rotate(10deg); }
+    60% { transform: rotate(-8deg); }
+    80% { transform: rotate(6deg); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.06, 0.94); }
+    70% { transform: scale(0.97, 1.03); }
+  }
+  svg { width: 230px; height: auto; overflow: visible; }
+  #liquid, #liquidTop { transition: y 0.6s ease, height 0.6s ease, fill 0.5s ease, cy 0.6s ease; }
+  .topping { transition: opacity 0.4s ease, transform 0.4s ease; }
+  .topping.off { opacity: 0; }
+
+  .drink-name {
+    min-height: 2.6em;
+    margin: 10px 0 4px;
+    font-weight: bold;
+    font-size: 1.15rem;
+  }
+  .drink-msg { color: var(--soft); min-height: 1.4em; margin: 0; }
+
+  .panel h2 { font-size: 1rem; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--soft); }
+  .panel h2:first-child { margin-top: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 2px solid transparent;
+    background: var(--chip);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .chip:hover { transform: translateY(-2px); }
+  .chip.active { border-color: var(--accent-dark); background: #fff; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
+
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  input[type=range] { flex: 1; accent-color: var(--accent-dark); }
+  .sweet-label { min-width: 110px; text-align: right; font-weight: bold; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  .btn {
+    flex: 1;
+    min-width: 110px;
+    border: none;
+    border-radius: 16px;
+    padding: 13px 16px;
+    font: inherit;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 5px 0 var(--accent-dark);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--accent-dark); }
+  .btn.alt { background: #a0c4ff; box-shadow: 0 5px 0 #7aa6e6; }
+  .btn.alt:active { box-shadow: 0 1px 0 #7aa6e6; }
+  .btn.ghost { background: #cdb4db; box-shadow: 0 5px 0 #a98fbd; }
+  .btn.ghost:active { box-shadow: 0 1px 0 #a98fbd; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .stats {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+  .stats b { color: var(--accent-dark); }
+
+  .heart {
+    position: fixed;
+    pointer-events: none;
+    font-size: 22px;
+    animation: floatUp 1.4s ease-out forwards;
+  }
+  @keyframes floatUp {
+    to { transform: translateY(-120px) scale(1.4); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <main class="shop">
+    <header>
+      <h1>🧋 Tiny Boba Shop</h1>
+      <p class="sub">Mix a drink, give it a shake, and sip away.</p>
+    </header>
+
+    <div class="layout">
+      <section class="stage">
+        <div class="cup-wrap" id="cupWrap">
+          <svg viewBox="0 0 200 280" aria-label="Your boba drink">
+            <defs>
+              <clipPath id="cupClip">
+                <path d="M30 60 L170 60 L152 262 Q150 270 142 270 L58 270 Q50 270 48 262 Z"/>
+              </clipPath>
+            </defs>
+
+            <!-- straw -->
+            <rect id="straw" x="112" y="0" width="16" height="200" rx="6" fill="#ff8fab" transform="rotate(12 120 100)"/>
+
+            <!-- liquid + toppings -->
+            <g clip-path="url(#cupClip)">
+              <rect x="0" y="0" width="200" height="280" fill="#fdf6f2"/>
+              <rect id="liquid" x="0" y="80" width="200" height="200" fill="#c9a27e"/>
+              <ellipse id="liquidTop" cx="100" cy="80" rx="80" ry="6" fill="#ffffff" opacity="0.35"/>
+
+              <g id="ice" class="topping">
+                <rect x="55" y="95" width="30" height="28" rx="6" fill="#fff" opacity="0.6" transform="rotate(-10 70 109)"/>
+                <rect x="105" y="110" width="28" height="26" rx="6" fill="#fff" opacity="0.6" transform="rotate(14 119 123)"/>
+                <rect x="78" y="140" width="26" height="24" rx="6" fill="#fff" opacity="0.55"/>
+              </g>
+
+              <g id="jelly" class="topping">
+                <rect x="60" y="195" width="14" height="14" rx="3" fill="#b9fbc0" opacity="0.9"/>
+                <rect x="98" y="185" width="14" height="14" rx="3" fill="#fbf8cc" opacity="0.9" transform="rotate(20 105 192)"/>
+                <rect x="126" y="200" width="14" height="14" rx="3" fill="#b9fbc0" opacity="0.9" transform="rotate(-15 133 207)"/>
+                <rect x="82" y="210" width="14" height="14" rx="3" fill="#fbf8cc" opacity="0.9"/>
+              </g>
+
+              <g id="pudding" class="topping">
+                <ellipse cx="72" cy="225" rx="18" ry="10" fill="#ffd166"/>
+                <ellipse cx="72" cy="221" rx="18" ry="5" fill="#b5651d" opacity="0.7"/>
+                <ellipse cx="124" cy="228" rx="16" ry="9" fill="#ffd166"/>
+                <ellipse cx="124" cy="224" rx="16" ry="4" fill="#b5651d" opacity="0.7"/>
+              </g>
+
+              <g id="pearls" class="topping"></g>
+            </g>
+
+            <!-- cup outline -->
+            <path d="M30 60 L170 60 L152 262 Q150 270 142 270 L58 270 Q50 270 48 262 Z"
+                  fill="none" stroke="#5a3e36" stroke-width="5" stroke-linejoin="round"/>
+            <rect x="22" y="50" width="156" height="14" rx="7" fill="#fff" stroke="#5a3e36" stroke-width="5"/>
+
+            <!-- face -->
+            <g id="face">
+              <circle cx="80" cy="180" r="5" fill="#5a3e36"/>
+              <circle cx="120" cy="180" r="5" fill="#5a3e36"/>
+              <circle cx="82" cy="178" r="1.6" fill="#fff"/>
+              <circle cx="122" cy="178" r="1.6" fill="#fff"/>
+              <ellipse cx="68" cy="192" rx="7" ry="4" fill="#ff8fab" opacity="0.7"/>
+              <ellipse cx="132" cy="192" rx="7" ry="4" fill="#ff8fab" opacity="0.7"/>
+              <path id="mouth" d="M92 190 Q100 198 108 190" fill="none" stroke="#5a3e36" stroke-width="3" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+        <p class="drink-name" id="drinkName">Pick your flavor to start!</p>
+        <p class="drink-msg" id="drinkMsg"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Tea base</h2>
+        <div class="chips" id="flavors"></div>
+
+        <h2>Toppings</h2>
+        <div class="chips" id="toppings"></div>
+
+        <h2>Sweetness</h2>
+        <div class="slider-row">
+          <input type="range" id="sweet" min="0" max="100" step="25" value="50" aria-label="Sweetness">
+          <span class="sweet-label" id="sweetLabel">50% 🍬</span>
+        </div>
+
+        <h2>Straw color</h2>
+        <div class="chips" id="straws"></div>
+
+        <div class="actions">
+          <button class="btn" id="shakeBtn">Shake it!</button>
+          <button class="btn alt" id="sipBtn">Sip</button>
+          <button class="btn ghost" id="refillBtn">Refill</button>
+        </div>
+
+        <div class="stats">
+          <span>Drinks made: <b id="made">0</b></span>
+          <span>Sips taken: <b id="sips">0</b></span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+  const flavors = [
+    { name: "Classic Milk", color: "#c9a27e", words: ["Cozy", "Classic", "Comfy"] },
+    { name: "Taro", color: "#c3a6e0", words: ["Dreamy", "Lavender", "Cloudy"] },
+    { name: "Matcha", color: "#9cc98a", words: ["Zen", "Leafy", "Mossy"] },
+    { name: "Thai Tea", color: "#f4a261", words: ["Sunset", "Golden", "Toasty"] },
+    { name: "Strawberry", color: "#ffafcc", words: ["Berry", "Blushing", "Sweetheart"] },
+    { name: "Brown Sugar", color: "#a0673c", words: ["Tiger", "Caramel", "Maple"] }
+  ];
+  const toppingList = [
+    { id: "pearls", label: "Pearls ⚫" },
+    { id: "jelly", label: "Jelly 🟩" },
+    { id: "pudding", label: "Pudding 🍮" },
+    { id: "ice", label: "Ice 🧊" }
+  ];
+  const strawColors = ["#ff8fab", "#a0c4ff", "#caffbf", "#ffd166", "#cdb4db"];
+  const sweetWords = ["0% 🙂", "25% 🍬", "50% 🍬", "75% 🍬🍬", "100% 🍬🍬🍬"];
+  const nouns = ["Bubble Buddy", "Cloud Sipper", "Pearl Party", "Boba Bean", "Little Latte", "Slurp Supreme"];
+  const messages = [
+    "It looks delicious. It also looks like it's judging you a little.",
+    "Certified cute by the Boba Council.",
+    "Tastes like a sunny Saturday.",
+    "This one gives main character energy.",
+    "Your drink says thank you.",
+    "The pearls are doing a happy dance."
+  ];
+
+  const state = {
+    flavor: flavors[0],
+    toppings: new Set(["pearls", "ice"]),
+    level: 1,
+    made: 0,
+    sips: 0
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const TOP = 80, BOTTOM = 262;
+
+  // Build pearls once
+  const pearlGroup = $("pearls");
+  for (let i = 0; i < 16; i++) {
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const row = Math.floor(i / 6);
+    c.setAttribute("cx", 62 + (i % 6) * 15 + (row % 2) * 7 + Math.random() * 3);
+    c.setAttribute("cy", 256 - row * 13 + Math.random() * 3);
+    c.setAttribute("r", 7);
+    c.setAttribute("fill", "#3b2a25");
+    pearlGroup.appendChild(c);
+  }
+
+  function chip(label, onClick, color) {
+    const b = document.createElement("button");
+    b.className = "chip";
+    if (color) {
+      const d = document.createElement("span");
+      d.className = "dot";
+      d.style.background = color;
+      b.appendChild(d);
+    }
+    b.appendChild(document.createTextNode(label));
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  // Flavors
+  flavors.forEach((f, i) => {
+    const b = chip(f.name, () => {
+      state.flavor = f;
+      document.querySelectorAll("#flavors .chip").forEach(c => c.classList.remove("active"));
+      b.classList.add("active");
+      render();
+      wiggle();
+    }, f.color);
+    if (i === 0) b.classList.add("active");
+    $("flavors").appendChild(b);
+  });
+
+  // Toppings
+  toppingList.forEach(t => {
+    const b = chip(t.label, () => {
+      state.toppings.has(t.id) ? state.toppings.delete(t.id) : state.toppings.add(t.id);
+      b.classList.toggle("active");
+      render();
+      wiggle();
+    });
+    if (state.toppings.has(t.id)) b.classList.add("active");
+    $("toppings").appendChild(b);
+  });
+
+  // Straws
+  strawColors.forEach((col, i) => {
+    const b = chip("", () => {
+      $("straw").setAttribute("fill", col);
+      document.querySelectorAll("#straws .chip").forEach(c => c.classList.remove("active"));
+      b.classList.add("active");
+    }, col);
+    b.setAttribute("aria-label", "Straw color " + (i + 1));
+    if (i === 0) b.classList.add("active");
+    $("straws").appendChild(b);
+  });
+
+  $("sweet").addEventListener("input", e => {
+    $("sweetLabel").textContent = sweetWords[e.target.value / 25];
+  });
+
+  function render() {
+    const y = TOP + (BOTTOM - TOP) * (1 - state.level);
+    $("liquid").setAttribute("y", y);
+    $("liquid").setAttribute("fill", state.flavor.color);
+    $("liquidTop").setAttribute("cy", y);
+    $("liquidTop").style.opacity = state.level > 0.02 ? 0.35 : 0;
+
+    toppingList.forEach(t => {
+      $(t.id).classList.toggle("off", !state.toppings.has(t.id));
+    });
+    // Ice floats, so hide it once the drink is nearly gone
+    if (state.level < 0.35) $("ice").classList.add("off");
+
+    const mouth = $("mouth");
+    if (state.level <= 0.02) mouth.setAttribute("d", "M92 196 Q100 188 108 196");
+    else if (state.level < 0.4) mouth.setAttribute("d", "M93 193 L107 193");
+    else mouth.setAttribute("d", "M92 190 Q100 198 108 190");
+
+    $("sipBtn").disabled = state.level <= 0.02;
+  }
+
+  function wiggle() {
+    const w = $("cupWrap");
+    w.classList.remove("bounce");
+    void w.offsetWidth;
+    w.classList.add("bounce");
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function hearts(x, y, count = 6) {
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement("span");
+      h.className = "heart";
+      h.textContent = pick(["💖", "✨", "🧋", "💕", "⭐"]);
+      h.style.left = (x + (Math.random() * 120 - 60)) + "px";
+      h.style.top = (y + (Math.random() * 40 - 20)) + "px";
+      h.style.animationDelay = (i * 0.08) + "s";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1700);
+    }
+  }
+
+  $("shakeBtn").addEventListener("click", () => {
+    const w = $("cupWrap");
+    w.classList.remove("shake");
+    void w.offsetWidth;
+    w.classList.add("shake");
+
+    state.level = 1;
+    state.made++;
+    $("made").textContent = state.made;
+    render();
+
+    const sweetness = Number($("sweet").value);
+    const prefix = sweetness >= 75 ? "Extra Sweet " : sweetness === 0 ? "Unsweetened " : "";
+    const name = prefix + pick(state.flavor.words) + " " + pick(nouns);
+    $("drinkName").textContent = "“" + name + "”";
+    $("drinkMsg").textContent = pick(messages);
+
+    const r = w.getBoundingClientRect();
+    setTimeout(() => hearts(r.left + r.width / 2, r.top + r.height / 3, 8), 500);
+  });
+
+  $("sipBtn").addEventListener("click", () => {
+    if (state.level <= 0.02) return;
+    state.level = Math.max(0, state.level - 0.2);
+    state.sips++;
+    $("sips").textContent = state.sips;
+    render();
+    wiggle();
+    $("drinkMsg").textContent = state.level <= 0.02
+      ? "All gone! Time for a refill?"
+      : pick(["Slurrrp!", "Mmm, chewy pearls.", "So refreshing.", "Sip sip hooray!"]);
+  });
+
+  $("refillBtn").addEventListener("click", () => {
+    state.level = 1;
+    render();
+    wiggle();
+    $("drinkMsg").textContent = "Topped up and ready to go.";
+  });
+
+  render();
+</script>
+</body>
+</html>
